@@ -6,7 +6,7 @@ require_relative 'log.rb'
 
 module RScape
   module GUI
-    class WDPreset < Qt::Widget
+    class ISPreset < Qt::Widget
       STAT_AGENTS_NUM = 'Agents N.'
       STAT_AVG_AGE = 'Avg. age'
       STAT_AVG_VISION = 'Avg. vision'

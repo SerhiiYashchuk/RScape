@@ -1,168 +1,254 @@
-require 'rscape/sugarscape'
-require 'rscape/agent'
+require_relative 'info_sharing_model.rb'
+require_relative 'info_sharing_preset.rb'
 require 'rscape/harvester'
+require 'rscape/neighbor'
 require 'rscape/info_sharing'
 
+def free_pos_in_fov(agent)
+  distance = rand 1..agent.vision
+  direction = nil
+  
+  case rand 1..4
+  when 1
+    direction = [0, -1] # top
+  when 2
+    direction = [0, 1] # bottom
+  when 3
+    direction = [-1, 0] # left
+  when 4
+    direction = [1, 0] # right
+  end
+      
+  new_row = agent.row + direction[0] * distance
+  new_col = agent.col + direction[1] * distance
+  
+  [new_row, new_col]
+end
+
+def move_agent(agent, sugarscape, row, col)
+  sugarscape.cell(agent.row, agent.col).occupant = nil
+  agent.move_to(row, col)
+  sugarscape.place_agent agent
+end
+
+$LOGGING = ARGV.include?("--logging") || ARGV.include?("-l")
+
+# Log colors
+GATHERING_COLOR = '#003300'
+INFO_SHARING_COLOR = '#000033'
+DEATH_COLOR = '#990000'
+
+# Model params
+$ROWS_NUMBER ||= 0
+$COLUMNS_NUMBER ||= 0
+$AGENTS_NUMBER ||= 0
+$SUGARS_NUMBER ||= 0
+$AGENT_INITIAL_WEALTH ||= 0
+$AGENT_METABOLISM ||= 0
+$AGENT_VISION ||= 0
+$AGENT_MAX_AGE ||= 0
+$SUGAR_CAPACITY ||= 0
+$SUGAR_LEVEL ||= 0
+$SUGAR_GROWTH ||= 0
+
+app = Qt::Application.new ARGV
+mw = ISModel.new
+
+mw.tps = 3
+mw.sugarscape_params.rows = $ROWS_NUMBER
+mw.sugarscape_params.cols = $COLUMNS_NUMBER
+mw.sugarscape_params.agents_count = $AGENTS_NUMBER
+mw.sugarscape_params.sugar_count = $SUGARS_NUMBER
+mw.sugar_params.capacity = $SUGAR_CAPACITY
+mw.sugar_params.level = $SUGAR_LEVEL
+mw.sugar_params.growth = $SUGAR_GROWTH
+mw.agent_params.wealth = $AGENT_INITIAL_WEALTH
+mw.agent_params.metabolism = $AGENT_METABOLISM
+mw.agent_params.vision = $AGENT_VISION
+mw.agent_params.max_age = $AGENT_MAX_AGE
+
+mw.view.setMinimumSize(400, 400)
+
+# Setup Agent's behavior patterns
 RScape::Agent.include RScape::Harvester
 RScape::Agent.include RScape::Neighbor
 RScape::Agent.include RScape::InfoSharing
 
-sugarscape = RScape::Sugarscape.new(rows: 10, cols: 10)
-sugars = Array.new(40) { RScape::Sugar.new(capacity: 6, level: 6, growth: 1) }
-population = Array.new(30) { RScape::Agent.random(wealth: 6..10,
-  metabolism: 1..3, vision: 1..2, max_age: nil) }
-
-sugars.each do |sugar|
-  row = rand sugarscape.rows_count
-  col = rand sugarscape.cols_count
-  
-  sugar.move_to(row, col)
-  redo unless sugarscape.add_sugar sugar
+# Procedures
+mw.set_agent_creation_proc do
+  RScape::Agent.random(wealth: mw.agent_params.wealth,
+                       metabolism: mw.agent_params.metabolism,
+                       vision: mw.agent_params.vision,
+                       max_age: mw.agent_params.max_age)
 end
 
-population.each do |agent|
-  row = rand sugarscape.rows_count
-  col = rand sugarscape.cols_count
-  
-  redo if sugarscape.cell(row, col).occupied?
-  
-  agent.move_to(row, col)
-  sugarscape.cell(row, col).occupant = agent
+mw.set_sugar_creation_proc do
+  RScape::Sugar.random(capacity: mw.sugar_params.capacity,
+                       level: mw.sugar_params.level,
+                       growth: mw.sugar_params.growth)
 end
 
-population.each do |agent|
+mw.set_agent_placement_proc do
+  row, col = nil, nil
+  
+  while true
+    row = rand mw.sugarscape.rows_count
+    col = rand mw.sugarscape.cols_count
+    
+    break unless mw.sugarscape.cell(row, col).occupied?
+  end
+  
+  [row, col]
+end
+
+mw.set_sugar_placement_proc do
+  row, col = nil, nil
+  
+  while true
+    row = rand mw.sugarscape.rows_count
+    col = rand mw.sugarscape.cols_count
+    
+    break unless mw.sugarscape.cell(row, col).has_sugar?
+  end
+  
+  [row, col]
+end
+
+mw.set_info_placement_proc do |agent|
   if agent.id % 10 == 0
-    agent.info[:greeting] = "Hello!"
+    agent.info[:greeting] = :hello
+    mw.view.change_agent_color(agent.id, 0, 0, 255)
   end
 end
 
-10.times do |iteration|
-  if $DEBUG
-    puts "Iteration #{iteration}"
+mw.set_iteration_proc do
+  if $LOGGING
+    mw.log.add "<b>Iteration #{mw.iterations_passed}</b>"
   end
   
   agents_to_delete = []
   agents_to_replace = []
   
-  population.each_with_index do |agent, index|
+  mw.population.each_with_index do |agent, index|
+    if $LOGGING
+      mw.log.add "<i>A:#{agent.id}</i> age is #{agent.age}"
+      mw.log.add "<i>A:#{agent.id}</i> wealth is #{agent.wealth}"
+    end
+    
     # Search for some sugar
-    sugars = agent.find_free_sugar sugarscape
+    sugars = agent.find_free_sugar mw.sugarscape
     
     if sugars.empty?
       # Move in random direction
-      distance = rand 1..agent.vision
-      direction = []
-      
-      case rand 1..4
-      when 1
-        direction = [0, -1] # top
-      when 2
-        direction = [0, 1] # bottom
-      when 3
-        direction = [-1, 0] # left
-      when 4
-        direction = [1, 0] # right
+      3.times do
+        new_row, new_col = free_pos_in_fov agent
+        
+        if !mw.sugarscape.cell(new_row, new_col).occupied?
+          if $LOGGING
+            mw.log.add "<i>A:#{agent.id}</i> moved from [#{agent.row}, " \
+              "#{agent.col}] to [#{new_row}, #{new_col}]"
+          end
+          
+          move_agent(agent, mw.sugarscape, new_row, new_col)
+          mw.view.move_agent(agent.id, agent.row, agent.col)
+          
+          break
+        end
       end
-      
-      new_row = agent.row + direction[0] * distance
-      new_col = agent.col + direction[1] * distance
-      
-      if $DEBUG
-        puts "A:#{agent.id} moved from [#{agent.row}, #{agent.col}] " \
-        "to [#{new_row}, #{new_col}]"
-      end
-      
-      sugarscape.cell(agent.row, agent.col).occupant = nil
-      agent.move_to(new_row, new_col)
-      sugarscape.cell(agent.row, agent.col).occupant = agent
       
     else
       # Gather sugar
       best_sugar = sugars.max_by(&:level)
+      sugar_level = best_sugar.level
       
-      if $DEBUG
-        puts "A:#{agent.id} moved from [#{agent.row}, #{agent.col}] " \
-        "to [#{best_sugar.row}, #{best_sugar.col}]"
+      if $LOGGING
+        mw.log.add "<i>A:#{agent.id}</i> moved from [#{agent.row}, " \
+          "#{agent.col}] to [#{best_sugar.row}, #{best_sugar.col}]"
       end
       
-      sugarscape.cell(agent.row, agent.col).occupant = nil
-      agent.move_to(best_sugar.row, best_sugar.col)
-      sugarscape.cell(agent.row, agent.col).occupant = agent
+      move_agent(agent, mw.sugarscape, best_sugar.row, best_sugar.col)
+      mw.view.move_agent(agent.id, agent.row, agent.col)
       agent.gather best_sugar
       
-      if $DEBUG
-        puts "A:#{agent.id} gathered #{best_sugar.level} points of sugar " \
-        "from S:#{best_sugar.id}"
+      if $LOGGING
+        mw.log.add("<i>A:#{agent.id}</i> gathered #{sugar_level} points of " \
+                   "sugar from <i>S:#{best_sugar.id}</i>",
+                   color: GATHERING_COLOR)
       end
     end
     
     # Share Info
-    agent.neighbors(sugarscape).each do |neighbor|
-      if !agent.info.empty?
+    if !agent.info.empty?
+      agent.neighbors(mw.sugarscape).each do |neighbor|
         agent.share_info neighbor
+        mw.view.change_agent_color(neighbor.id, 0, 0, 255)
         
-        if $DEBUG
-          puts "A:#{agent.id} shared info with A:#{neighbor.id}"
-          puts "A:#{agent.id} info is #{agent.info}"
+        if $LOGGING
+          mw.log.add("<i>A:#{agent.id}</i> shared info with " \
+                     "<i>A:#{neighbor.id}</i>", color: INFO_SHARING_COLOR)
+          mw.log.add "<i>A:#{agent.id}</i> info is <i>#{agent.info}</i>"
         end
-      end
-    end
-    
-    # Mark dead agents to be removed
-    if agent.wealth.zero?
-      agents_to_delete << index
-      sugarscape.cell(agent.row, agent.col).occupant = nil
-      
-      if $DEBUG
-        puts "A:#{agent.id} died because of starvation"
-      end
-    end
-    
-    # Mark old agents to be replaced
-    if agent.age == agent.max_age
-      agents_to_replace << index
-      
-      if $DEBUG
-        puts "A:#{agent.id} died because of age"
       end
     end
     
     agent.metabolize
     agent.grow
     
-    if $DEBUG
-      puts "A:#{agent.id} age is #{agent.age}"
-      puts "A:#{agent.id} wealth is #{agent.wealth}"
+    # Mark dead agents to be removed
+    if agent.wealth.zero?
+      agents_to_delete << agent
+      
+      if $LOGGING
+        mw.log.add("<i>A:#{agent.id}</i> died because of starvation",
+                   color: DEATH_COLOR)
+      end
+    end
+    
+    # Mark old agents to be replaced
+    if agent.age == agent.max_age && !agents_to_delete.include?(index)
+      agents_to_replace << index
+      
+      if $LOGGING
+        mw.log.add("<i>A:#{agent.id}</i> died because of age",
+                   color: DEATH_COLOR)
+      end
     end
   end
   
   # Produce sugar
-  sugarscape.growback
+  mw.sugarscape.growback
   
   # Replace old agents
   agents_to_replace.each do |index|
-    row = rand sugarscape.rows_count
-    col = rand sugarscape.cols_count
+    agent = mw.population[index]
     
-    redo if sugarscape.cell(row, col).occupied?
+    mw.sugarscape.cell(agent.row, agent.col).occupant = nil
+    mw.view.delete_agent agent.id
     
-    new_agent = RScape::Agent.random(wealth: 6..10, metabolism: 1..3,
-                                     vision: 1..2, max_age: 20..30)
+    new_agent = mw.new_agent_proc.call
+    row, col = mw.agent_placement_proc.call
     
+    mw.info_placement_proc.call new_agent
     new_agent.move_to(row, col)
-    sugarscape.cell(new_agent.row, new_agent.col).occupant = new_agent
-    population[index] = new_agent
+    mw.sugarscape.place_agent new_agent
+    mw.population[index] = new_agent
+    mw.view.add_agent new_agent
   end
   
   # Delete dead agents
-  agents_to_delete.each { |index| population.delete_at index }
-  
-  # Info statistic
-  smart_agents = 0
-  
-  population.each do |agent|
-    smart_agents += 1 unless agent.info.empty?
+  agents_to_delete.each do |agent|
+    mw.sugarscape.cell(agent.row, agent.col).occupant = nil
+    mw.view.delete_agent agent.id
+    mw.population.delete agent
   end
   
-  puts "Info percentage: #{smart_agents.to_f / population.size}"
+  mw.update_statistic
+  
+  if $LOGGING
+    mw.log.add ''
+  end
 end
+
+mw.setWindowTitle "Information sharing"
+mw.show
+app.exec

@@ -1,5 +1,6 @@
 require_relative 'wealth_distribution_model.rb'
 require_relative 'wealth_distribution_preset.rb'
+require 'rscape/harvester'
 
 def free_pos_in_fov(agent)
   distance = rand 1..agent.vision

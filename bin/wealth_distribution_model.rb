@@ -1,6 +1,5 @@
 require 'rscape/sugarscape'
 require 'rscape/agent'
-require 'rscape/harvester'
 require 'rscape/statistic'
 require 'rscape/gui/wd_preset'
 require 'rscape/gui/sugarscape_view'

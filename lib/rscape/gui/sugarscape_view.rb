@@ -96,12 +96,11 @@ module RScape
       def change_agent_color(agent_id, r, g, b)
         if agent = @agents[agent_id]
           x, y = agent.x, agent.y
-          brush = Qt::Brush.new Qt::Color.new(r, g, b)
           
           @scene.removeItem agent
           
           new_item = @scene.addEllipse(0, 0, @cell_size, @cell_size, @pen,
-                                       brush)
+                                       Qt::Brush.new(Qt::Color.new(r, g, b)))
         
           new_item.setPos(x, y)
           @agents[agent_id] = new_item
@@ -111,12 +110,11 @@ module RScape
       def change_sugar_color(sugar_id, r, g, b)
         if sugar = @sugar_sources[sugar_id]
           x, y = sugar.x, sugar.y
-          brush = Qt::Brush.new Qt::Color.new(r, g, b)
           
           @scene.removeItem sugar
           
           new_item = @scene.addEllipse(0, 0, @cell_size, @cell_size, @pen,
-                                       brush)
+                                       Qt::Brush.new(Qt::Color.new(r, g, b)))
         
           new_item.setPos(x, y)
           @sugar_sources[sugar_id] = new_item

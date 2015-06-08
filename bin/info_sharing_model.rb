@@ -1,6 +1,5 @@
 require 'rscape/sugarscape'
 require 'rscape/agent'
-require 'rscape/harvester'
 require 'rscape/statistic'
 require 'rscape/gui/is_preset'
 require 'rscape/gui/sugarscape_view'
@@ -33,6 +32,8 @@ class ISModel < RScape::GUI::ISPreset
     @info_placement_proc = nil
     @iterate_proc = nil
     @view = RScape::GUI::SugarscapeView.new 10
+    
+    @view.setWindowTitle "Sugarscape view"
     
     connect(start_button, SIGNAL('pressed()'), self, SLOT('create_model()'))
     connect(stop_button, SIGNAL('pressed()'), self, SLOT('stop()'))
