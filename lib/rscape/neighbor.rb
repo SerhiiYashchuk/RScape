@@ -1,7 +1,11 @@
 require_relative 'sugarscape.rb'
 
 module RScape
+  # Represents von Neumann neighbors searching behavior for Agent.
   module Neighbor
+    # Searches for neighbors within a field of view.
+    #
+    # Returns an Array of Agents.
     def neighbors(sugarscape)
       neighbors = []
       neighborhood = [

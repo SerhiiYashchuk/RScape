@@ -2,7 +2,9 @@ require 'Qt'
 
 module RScape
   module GUI
+    # Widget for setting Sugar parameters.
     class SugarParams < Qt::Widget
+      # Creates a new Widget.
       def initialize(parent = nil)
         super parent
         
@@ -33,32 +35,41 @@ module RScape
         setLayout main_layout
       end
       
+      # Capacity getter. Supports Range.
       def capacity
         extract_values @capacity_edit.text
       end
       
+      # Capacity setter. Supports Range.
       def capacity=(value)
         @capacity_edit.setText value.to_s
       end
       
+      # Level getter. Supports Range.
       def level
         extract_values @level_edit.text
       end
       
+      # Level setter. Supports Range.
       def level=(value)
         @level_edit.setText value.to_s
       end
       
+      # Growth getter. Supports Range.
       def growth
         extract_values @growth_edit.text
       end
       
+      # Growth setter. Supports Range.
       def growth=(value)
         @growth_edit.setText value.to_s
       end
       
       private
       
+      # Extracts values from text.
+      #
+      # Returns Number or Range.
       def extract_values(string)
         values = string.split('..').map(&:to_i)
         

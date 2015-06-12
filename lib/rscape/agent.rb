@@ -1,10 +1,29 @@
 module RScape
+  # Represents Agent.
   class Agent
+    # ID for a new Agent.
     @@new_id = 0
     
-    attr_reader :wealth, :vision, :metabolism, :row, :col, :age, :max_age, :id,
-      :initial_wealth
+    # Current amount of sugar.
+    attr_reader :wealth
+    # Number of cells that Agent can see from its current position.
+    attr_reader :vision
+    # Amount of sugar that Agent needs for one iteration of its life.
+    attr_reader :metabolism
+    # Row that Agent stands on.
+    attr_reader :row
+    # Column that Agent stands on.
+    attr_reader :col
+    # Number of iteration that Agent lived for.
+    attr_reader :age
+    # Number of iteration that Agent can live for.
+    attr_reader :max_age
+    # ID of the Agent.
+    attr_reader :id
+    # Initial amount of sugar.
+    attr_reader :initial_wealth
     
+    # Creates new Agent.
     def initialize(wealth:, metabolism:, vision:, max_age: nil)
       @row = nil
       @col = nil
@@ -17,6 +36,7 @@ module RScape
       @@new_id += 1
     end
     
+    # Creates new Agent with random attributes if they are of a Range type.
     def self.random(wealth:, metabolism:, vision:, max_age: nil)
       wealth = rand wealth if wealth.is_a? Range
       metabolism = rand metabolism if metabolism.is_a? Range
@@ -27,10 +47,12 @@ module RScape
                 max_age: max_age)
     end
     
+    # Decreases +wealth+ by +metabolism+.
     def metabolize
       @wealth = [@wealth - @metabolism, 0].max
     end
     
+    # Increases +age+ by 1 until it reaches +max_age+.
     def grow
       if @max_age.nil?
         @age += 1
@@ -40,6 +62,7 @@ module RScape
       end
     end
     
+    # Moves Agent to the specified position.
     def move_to(row, col)
       @row, @col = row, col
     end

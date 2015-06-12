@@ -2,9 +2,14 @@ require 'Qt'
 
 module RScape
   module GUI
+    # Widget with simulation control elements.
     class ControlPanel < Qt::Widget
-      attr_reader :start_button, :stop_button
+      # Start button.
+      attr_reader :start_button
+      # Stop button.
+      attr_reader :stop_button
       
+      # Creates a new Widget.
       def initialize(parent = nil)
         super parent
         

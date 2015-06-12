@@ -2,7 +2,9 @@ require 'Qt'
 
 module RScape
   module GUI
+    # Widget for setting Sugarscape parameters.
     class SugarscapeParams < Qt::Widget
+      # Creates a new Widget.
       def initialize(parent = nil)
         super parent
         
@@ -41,34 +43,42 @@ module RScape
         setLayout main_layout
       end
       
+      # Rows number getter.
       def rows
         @rows_edit.text.to_i
       end
       
+      # Rows number setter.
       def rows=(value)
         @rows_edit.setText value.to_s
       end
       
+      # Columns number getter.
       def cols
         @cols_edit.text.to_i
       end
       
+      # Columns number setter.
       def cols=(value)
         @cols_edit.setText value.to_s
       end
       
+      # Agents number getter.
       def agents_count
         @agents_count_edit.text.to_i
       end
       
+      # Agents number setter.
       def agents_count=(value)
         @agents_count_edit.setText value.to_s
       end
       
+      # Sugar number getter.
       def sugar_count
         @sugar_count_edit.text.to_i
       end
       
+      # Sugar number setter.
       def sugar_count=(value)
         @sugar_count_edit.setText value.to_s
       end

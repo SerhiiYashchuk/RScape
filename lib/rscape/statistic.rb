@@ -2,7 +2,13 @@ require_relative 'agent.rb'
 require_relative 'harvester.rb'
 
 module RScape
+  # Statistic module.
   module Statistic
+    # Determines wealth distribution in a society.
+    #
+    # data - an Array of wealth values.
+    #
+    # Returns a Hash of wealth-frequency pairs.
     def self.wealth_distribution(data)
       frequencies = Hash.new 0
       
@@ -11,6 +17,9 @@ module RScape
       frequencies
     end
     
+    # Calculates Gini coefficient.
+    #
+    # data - an Array of wealth values.
     def self.gini(data)
       distribution = wealth_distribution data
       frequencies = distribution.values.sort

@@ -2,7 +2,9 @@ require 'Qt'
 
 module RScape
   module GUI
+    # Widget for setting Agent parameters.
     class AgentParams < Qt::Widget
+      # Creates a new widget.
       def initialize(parent = nil)
         super parent
         
@@ -41,40 +43,51 @@ module RScape
         setLayout main_layout
       end
       
+      # Wealth parameter getter. Supports Range.
       def wealth
         extract_values @wealth_edit.text
       end
       
+      # Wealth parameter setter. Supports Range.
       def wealth=(value)
         @wealth_edit.setText value.to_s
       end
       
+      # Metabolism parameter getter. Supports Range.
       def metabolism
         extract_values @metabolism_edit.text
       end
       
+      # Metabolism parameter setter. Supports Range.
       def metabolism=(value)
         @metabolism_edit.setText value.to_s
       end
       
+      # Vision parameter getter. Supports Range.
       def vision
         extract_values @vision_edit.text
       end
       
+      # Vision parameter setter. Supports Range.
       def vision=(value)
         @vision_edit.setText value.to_s
       end
       
+      # Maximum age parameter getter. Supports Range.
       def max_age
         extract_values @max_age_edit.text
       end
       
+      # Maximum age parameter setter. Supports Range.
       def max_age=(value)
         @max_age_edit.setText value.to_s
       end
       
       private
       
+      # Extracts values from text.
+      #
+      # Returns Number or Range.
       def extract_values(string)
         values = string.split('..').map(&:to_i)
         

@@ -6,21 +6,43 @@ require_relative 'log.rb'
 
 module RScape
   module GUI
+    # Window preset for Wealth Distribution simulation.
     class WDPreset < Qt::Widget
+      # Number of agents.
       STAT_AGENTS_NUM = 'Agents N.'
+      # Average age.
       STAT_AVG_AGE = 'Avg. age'
+      # Average vision.
       STAT_AVG_VISION = 'Avg. vision'
 
+      # Average wealth.
       STAT_AVG_WEALTH = 'Avg. wealth'
+      # Gini coefficient.
       STAT_GINI = 'Gini coef.'
       
+      # Maximum width of parameters Widget.
       PARAMS_MAXIMUM_WIDTH = 250
+      # Maximum width of buttons.
       BUTTONS_MAXIMUM_WIDTH = 100
       
-      attr_reader :start_button, :stop_button, :sugarscape_params,
-      :sugar_params, :agent_params, :social_statistic, :economical_statistic,
-      :log
+      # Start button.
+      attr_reader :start_button
+      # Stop button.
+      attr_reader :stop_button
+      # Sugarscape parameters Widget.
+      attr_reader :sugarscape_params
+      # Sugar parameters Widget.
+      attr_reader :sugar_params
+      # Agent parameters Widget.
+      attr_reader :agent_params
+      # Social statistics Widget.
+      attr_reader :social_statistic
+      # Economical statistics Widget.
+      attr_reader :economical_statistic
+      # Log Widget.
+      attr_reader :log
       
+      # Creates a new Window.
       def initialize
         super
         

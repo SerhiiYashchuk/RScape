@@ -2,9 +2,14 @@ require_relative 'sugar.rb'
 require_relative 'cell.rb'
 
 module RScape
+  # Represents an area where all action takes place =).
   class Sugarscape
-    attr_reader :rows_count, :cols_count
+    # Number of rows.
+    attr_reader :rows_count
+    # Number of columns.
+    attr_reader :cols_count
     
+    # Creates a new Sugarscape of the specified size.
     def initialize(rows:, cols:)
       @rows_count = rows
       @cols_count = cols
@@ -12,15 +17,23 @@ module RScape
       @sugar_sources = {}
     end
     
+    # Returns a Cell that is located on a specified position.
     def cell(row, col)
       row, col = correct(row, col)
       @cells[row][col]
     end
     
+    # Number of Cells.
     def cells_count
       @rows_count * @cols_count
     end
     
+    # Adds Sugar source.
+    #
+    # new_sugar - Sugar source to be placed. Has to be positioned previously.
+    #
+    # Returns +true+ if succeeded, +false+ if +new_sugar+ isn't positioned
+    # or its position is already taken.
     def add_sugar(new_sugar)
       return false if new_sugar.row.nil? || new_sugar.col.nil?
       
@@ -35,24 +48,36 @@ module RScape
       return true
     end
     
+    # Removes Sugar source.
+    #
+    # sugar_id - ID of the Sugar source.
     def remove_sugar(sugar_id)
       if sugar = @sugar_sources.delete(sugar_id)
         cell(sugar.row, sugar.col).sugar = nil
       end
     end
     
+    # Returns Sugar source with the given ID.
     def sugar(sugar_id)
       @sugar_sources[sugar_id]
     end
     
+    # Returns an Array of Sugar sources.
     def sugars
       @sugar_sources.values
     end
     
+    # Increases level of sugar for all Sugar sources.
     def growback
       @sugar_sources.each_value(&:grow)
     end
     
+    # Places Agent.
+    #
+    # agent - Agent to place. Has to be positioned previously.
+    #
+    # Returns +true+ if succeeded, +false+ if Agent isn't positioned or its
+    # position is already taken.
     def place_agent(agent)
       return false if agent.row.nil? || agent.col.nil?
       
@@ -66,6 +91,7 @@ module RScape
       return true
     end
     
+    # Spreads pollution.
     # def diffuse_pollution
     #   pollution_grid = []
       
@@ -91,6 +117,7 @@ module RScape
     #   end
     # end
     
+    # Returns correct Cell on a specified position.
     def correct(row, col)
       if row.between?(0, @rows_count - 1) && col.between?(0, @cols_count - 1)
         [row, col]

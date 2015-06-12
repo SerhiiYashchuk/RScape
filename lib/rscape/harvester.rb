@@ -1,12 +1,17 @@
 require_relative 'sugarscape.rb'
 
 module RScape
+  # Represents sugar harvesting behavior for Agent.
   module Harvester
+    # Increases +wealth+ by sources' current level of sugar.
     def gather(sugar)
       @wealth += sugar.level
       sugar.empty
     end
     
+    # Searches for free Sugar sources within field of view.
+    #
+    # Returns an Array of Sugar sources.
     def find_free_sugar(sugarscape)
       found_sugar = []
       
