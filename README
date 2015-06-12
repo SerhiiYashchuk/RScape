@@ -1,0 +1,8 @@
+RScape
+
+Sugarscape written in Ruby.
+
+Supported simulations:
+- wealth distribution
+- information sharing
+- pollution spreading
