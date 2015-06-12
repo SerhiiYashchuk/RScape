@@ -3,7 +3,7 @@ require 'Qt'
 module RScape
   module GUI
     # Widget for setting Sugarscape parameters.
-    class SugarscapeParams < Qt::Widget
+    class SugarscapeParams < Qt::GroupBox
       # Creates a new Widget.
       def initialize(parent = nil)
         super parent
@@ -41,6 +41,7 @@ module RScape
         main_layout.addLayout row_2_layout
         
         setLayout main_layout
+        setTitle 'Sugarscape'
       end
       
       # Rows number getter.

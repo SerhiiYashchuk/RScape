@@ -3,7 +3,7 @@ require 'Qt'
 module RScape
   module GUI
     # Widget for setting Sugar parameters.
-    class SugarParams < Qt::Widget
+    class SugarParams < Qt::GroupBox
       # Creates a new Widget.
       def initialize(parent = nil)
         super parent
@@ -33,6 +33,7 @@ module RScape
         main_layout.addLayout row_1_layout
         
         setLayout main_layout
+        setTitle 'Sugar'
       end
       
       # Capacity getter. Supports Range.

@@ -3,7 +3,7 @@ require 'Qt'
 module RScape
   module GUI
     # Widget for setting Agent parameters.
-    class AgentParams < Qt::Widget
+    class AgentParams < Qt::GroupBox
       # Creates a new widget.
       def initialize(parent = nil)
         super parent
@@ -41,6 +41,7 @@ module RScape
         main_layout.addLayout row_2_layout
         
         setLayout main_layout
+        setTitle 'Agents'
       end
       
       # Wealth parameter getter. Supports Range.
