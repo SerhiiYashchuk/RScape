@@ -33,7 +33,7 @@ class TestInfoSharing < Test::Unit::TestCase
     sugarscape.cell(agent3.row, agent3.col).occupant = agent3
     sugarscape.cell(agent4.row, agent4.col).occupant = agent4
     
-    @agent.info[:greeting] = "Hello!"
+    @agent.info << :greeting
     
     @agent.neighbors(sugarscape).each do |neighbor|
       @agent.share_info neighbor
