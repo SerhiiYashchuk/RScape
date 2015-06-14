@@ -25,6 +25,9 @@ module RScape
         
         main_layout = Qt::HBoxLayout.new
         
+        @view.setRenderHints Qt::Painter::Antialiasing |
+          Qt::Painter::SmoothPixmapTransform
+        
         main_layout.addWidget @view
         setLayout main_layout
       end
@@ -94,6 +97,25 @@ module RScape
         if sugar = @sugar_sources[sugar_id]
           sugar.setPos(row * @cell_size, col * @cell_size)
         end
+      end
+      
+      # Removes all agents.
+      def clear_agents
+        @agents.each { |_, agent| @scene.removeItem agent }
+        @agents.clear
+      end
+      
+      # Removes all sugar sources.
+      def clear_sugar
+        @sugar_sources.each { |_, sugar| @scene.removeItem sugar }
+        @sugar_sources.clear
+      end
+      
+      # Removes all agents and sugar sources.
+      def clear
+        @scene.clear
+        @agents.clear
+        @sugar_sources.clear
       end
       
       # Returns number of Agents.

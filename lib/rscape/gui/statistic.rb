@@ -17,7 +17,7 @@ module RScape
         layout.addWidget @table
         setLayout layout
         
-        @table.setVerticalHeaderLabels entries.keys
+        @table.setVerticalHeaderLabels entries.keys.map(&:to_s)
         @table.horizontalHeader.hide
         @table.setEditTriggers Qt::AbstractItemView::NoEditTriggers
         
