@@ -1,5 +1,4 @@
 require 'Qt'
-require_relative '../plot.rb'
 
 module RScape
   module GUI

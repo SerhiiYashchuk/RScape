@@ -1,6 +1,7 @@
 require 'rscape/sugarscape'
 require 'rscape/agent'
 require 'rscape/statistic'
+require 'rscape/plot'
 require 'rscape/gui/main_window'
 require 'rscape/gui/sugarscape_view'
 
@@ -12,6 +13,7 @@ class Model < RScape::GUI::MainWindow
   
   slots 'start()', 'stop()', 'reset()', 'iterate()'
   slots 'collect_statistic()', 'update_statistic()'
+  slots 'show_plot()'
   
   attr_accessor :tps, :sugarscape, :population, :iterations_passed
   attr_reader :new_sugar_proc, :new_agent_proc, :sugar_placement_proc,
@@ -51,6 +53,8 @@ class Model < RScape::GUI::MainWindow
     connect(control_panel.reset_button, SIGNAL('pressed()'),
             self, SLOT('reset()'))
     connect(@timer, SIGNAL('timeout()'), self, SLOT('iterate()'))
+    connect(plot_panel.plot_button, SIGNAL('pressed()'),
+            self, SLOT('show_plot()'))
   end
   
   def start
@@ -58,6 +62,8 @@ class Model < RScape::GUI::MainWindow
     control_panel.start_button.setEnabled false
     control_panel.stop_button.setEnabled true
     control_panel.reset_button.setEnabled false
+    
+    show_statistics_panel
     
     @timer.start 1000 / @tps
   end
@@ -76,6 +82,8 @@ class Model < RScape::GUI::MainWindow
     @sugarscape = nil
     @population.clear
     @view.clear
+    
+    show_parameters_panel
     
     clear_statistic
   end
@@ -151,6 +159,22 @@ class Model < RScape::GUI::MainWindow
   end
   
   private
+  
+  def show_plot
+    x_data_name = plot_panel.x_data_list.currentText.to_sym
+    y_data_name = plot_panel.y_data_list.currentText.to_sym
+    plot_type = plot_panel.type_list.currentText.to_sym
+    
+    plot = RScape::Plot.new
+    
+    plot.x_data = @statistics[x_data_name]
+    plot.y_data = @statistics[y_data_name]
+    plot.type = plot_type
+    plot.x_title = x_data_name.to_s
+    plot.y_title = y_data_name.to_s
+    
+    plot.show
+  end
   
   def create_model
     create_sugarscape

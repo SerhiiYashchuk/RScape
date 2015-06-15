@@ -57,30 +57,51 @@ module RScape
       def initialize
         super
         
-        @toolbox = Qt::ToolBox.new
+        @side_panel = Qt::ToolBox.new
         @control_panel = ControlPanel.new
         @view = SugarscapeView.new 15
         @log = Log.new
         
-        @toolbox.addItem(create_params_panel, 'Parameters')
-        @toolbox.addItem(create_statistics_panel, 'Statistics')
-        @toolbox.setMaximumWidth 350
+        @side_panel.addItem(create_params_panel, 'Parameters')
+        @side_panel.addItem(create_statistics_panel, 'Statistics')
+        @side_panel.setMinimumWidth 350
+        @side_panel.setMaximumWidth 350
         
         @control_panel.setMaximumWidth 350
         @control_panel.stop_button.setEnabled false
         
         @view.setMinimumSize(600, 600)
         @view.setMaximumSize(1000, 1000)
+        @view.resize(600, 600)
+        
+        @log.setMinimumHeight 200
         
         side_panel_layout = Qt::VBoxLayout.new
+        vertical_layout = Qt::VBoxLayout.new
+        horizontal_layout = Qt::HBoxLayout.new
         main_layout = Qt::HBoxLayout.new
         
-        side_panel_layout.addWidget @toolbox
+        side_panel_layout.addWidget @side_panel
         side_panel_layout.addWidget @control_panel
+        vertical_layout.addStretch
+        vertical_layout.addWidget @view
+        vertical_layout.addStretch
+        vertical_layout.addWidget @log
+        horizontal_layout.addStretch
+        horizontal_layout.addLayout vertical_layout
+        horizontal_layout.addStretch
         main_layout.addLayout side_panel_layout
-        main_layout.addWidget @view
+        main_layout.addLayout horizontal_layout
 
         setLayout main_layout
+      end
+      
+      def show_parameters_panel
+        @side_panel.setCurrentIndex 0
+      end
+      
+      def show_statistics_panel
+        @side_panel.setCurrentIndex 1
       end
       
       private
@@ -101,6 +122,7 @@ module RScape
         params_layout.addWidget @sugar_params
         params_layout.addWidget @agent_params
         params_layout.addWidget @info_params
+        params_layout.addStretch
         
         params_panel.setLayout params_layout
         
@@ -131,6 +153,7 @@ module RScape
         statistics_layout.addWidget @economical_statistic
         statistics_layout.addWidget @info_spread_statistic
         statistics_layout.addWidget create_plot_panel
+        statistics_layout.addStretch
         
         statistics_panel.setLayout statistics_layout
         

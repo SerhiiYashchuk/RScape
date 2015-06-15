@@ -13,14 +13,21 @@ module RScape
     attr_accessor :x_title
     # Y axis title.
     attr_accessor :y_title
+    # Plot type.
+    attr_accessor :type
     
     # Creates a new plot.
-    def initialize(x_data: nil, y_data: nil, title: nil, x_title: nil, y_title: nil)
+    #
+    # x_data - an Array of X values.
+    # y_data - an Array of Y values.
+    # type - plot type (+:line+, +:point+ or +:histo+).
+    def initialize(x_data: nil, y_data: nil, type: nil)
       @x_data = x_data || []
       @y_data = y_data || []
-      @x_title = x_title || 'X'
-      @y_title = y_title || 'Y'
-      @title = title || ''
+      @x_title = 'X'
+      @y_title = 'Y'
+      @title = ''
+      @type = type || :line
     end
     
     # Shows plot.
@@ -31,7 +38,7 @@ module RScape
       
       send_data_to_r
       
-      R.eval 'plot(x, y, xlab=x_title, ylab=y_title, main=title, type="l")'
+      R.eval 'plot(x, y, xlab=x_title, ylab=y_title, main=title, type=plot_type)'
     end
     
     # Exports plot to file.
@@ -62,11 +69,16 @@ module RScape
     
     # Sends all data to R before making plot.
     def send_data_to_r
+      if ![:line, :point, :histo].include? @type
+        raise(RuntimeError, 'Unsupported plot type.')
+      end
+      
       R.assign('x', @x_data)
       R.assign('y', @y_data)
       R.assign('x_title', @x_title)
       R.assign('y_title', @y_title)
       R.assign('title', @title)
+      R.assign('plot_type', @type.to_s[0])
     end
   end
 end

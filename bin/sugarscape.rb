@@ -71,7 +71,6 @@ mw.agent_params.max_age = $AGENT_MAX_AGE
 mw.info_params.chunks = $INFO_CHUNKS.map(&:to_s)
 mw.info_params.initial_bearers = $INITIAL_INFO_BEARERS
 
-mw.view.setMinimumSize(400, 400)
 mw.log.hide unless $LOGGING
 
 # Setup Agent's behavior patterns
