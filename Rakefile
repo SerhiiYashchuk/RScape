@@ -1,6 +1,16 @@
 require 'rake/testtask'
 require 'rdoc/task'
 
+task default: :sugarscape
+
+task :sugarscape do
+  ruby "-Ilib ./bin/sugarscape.rb"
+end
+
+task :sugarscape_log do
+  ruby "-Ilib ./bin/sugarscape.rb -l"
+end
+
 Rake::TestTask.new do |test|
   test.test_files = FileList["test/test*.rb"]
   test.verbose = true
