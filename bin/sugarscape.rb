@@ -31,7 +31,11 @@ def move_agent(agent, sugarscape, row, col)
   sugarscape.place_agent agent
 end
 
+$TPS = 1
+
 $LOGGING = ARGV.include?("--logging") || ARGV.include?("-l")
+$TPS = 4 if ARGV.include?("--fast")
+$TPS = 8 if ARGV.include?("--faster")
 
 # Log colors
 GATHERING_COLOR = '#003300'
@@ -56,7 +60,7 @@ $INITIAL_INFO_BEARERS ||= 0
 app = Qt::Application.new ARGV
 mw = Model.new
 
-mw.tps = 3
+mw.tps = $TPS
 mw.sugarscape_params.rows = $ROWS_NUMBER
 mw.sugarscape_params.cols = $COLUMNS_NUMBER
 mw.sugarscape_params.agents_count = $AGENTS_NUMBER
@@ -120,7 +124,7 @@ end
 
 mw.set_info_placement_proc do |agent|
   if agent.id % ((mw.population.size - 1) / $INITIAL_INFO_BEARERS) == 0
-    agent.info = $INFO_CHUNKS
+    agent.info << $INFO_CHUNKS[rand($INFO_CHUNKS.count)]
     mw.view.change_agent_color(agent.id, 0, 0, 255)
   end
 end
@@ -185,7 +189,12 @@ mw.set_iteration_proc do
     if !agent.info.empty?
       agent.neighbors(mw.sugarscape).each do |neighbor|
         agent.share_info neighbor
-        mw.view.change_agent_color(neighbor.id, 0, 0, 255)
+        if agent.info.count == $INFO_CHUNKS.count
+          mw.view.change_agent_color(neighbor.id, 0, 255, 0)
+          
+        else
+          mw.view.change_agent_color(neighbor.id, 0, 0, 255)
+        end
         
         if $LOGGING
           mw.log.add("<i>A:#{agent.id}</i> shared info with " \
@@ -232,7 +241,7 @@ mw.set_iteration_proc do
     new_agent = mw.new_agent_proc.call
     row, col = mw.agent_placement_proc.call
     
-    mw.info_placement_proc.call new_agent
+    # mw.info_placement_proc.call new_agent
     new_agent.move_to(row, col)
     mw.sugarscape.place_agent new_agent
     mw.population[index] = new_agent
